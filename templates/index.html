@@ -7,7 +7,7 @@
 		<h2 class="text-2xl font-sans font-bold">Your Todos</h2>
 		<div id="todos" class="flex flex-col gap-2">
 			{{ range .Todos }}
-			<div class="flex flex-row gap-2">
+			<div id="{{ .Id }}" class="flex flex-row gap-y-2 gap-x-4">
 				<span class="min-w-96 text-lg">{{ .Text }}</span>
 				{{ if .Completed }}
 				<input hx-trigger="click" hx-post="/todo/{{ .Id }}/toggle" hx-swap="outerHTML"
@@ -16,6 +16,14 @@
 				<input hx-trigger="click" hx-post="/todo/{{ .Id }}/toggle" hx-swap="outerHTML"
 					hx-target="closest div" type="checkbox"></input>
 				{{ end }}
+				<button 
+					class="border-r p-1 rounded-md bg-red-300 text-white" 
+					hx-delete="/todo/{{ .Id }}" 
+					hx-target="#{{ .Id }}" 
+					hx-swap="delete"
+				>
+					<img class="h-4 w-4" src="/static/trash.svg">
+				</button>
 			</div>
 			{{ end }}
 		</div>
@@ -29,10 +37,10 @@
 			hx-on::before-request="this.querySelector('button').classList.add('htmx-request')" 
 			hx-on::after-request="this.querySelector('button').classList.remove('htmx-request')"
 		>
-			<div class="w-full flex flex-row gap-2 items-center">
+			<div class="w-full flex flex-row gap-4 items-center">
 				<input name="text" class="flex-1 h-full border rounded p-2" placeholder="New todo!"></input>
 				<button type="submit"
-					class="border-2 p-2 border-black rounded-lg bg-blue-400 text-white">
+					class="border-2 p-1 rounded-lg bg-blue-400 text-white">
 					<span class="button-text">Add</span>
 					<img id="loading-spinner" src="/static/spinner.svg" class="htmx-indicator h-6 w-6">
 				</button>

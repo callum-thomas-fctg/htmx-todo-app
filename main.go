@@ -4,10 +4,11 @@ import (
 	"errors"
 	"html/template"
 	"io"
+	"math/rand"
 	"net/http"
 	"slices"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -54,12 +55,12 @@ func main() {
 		todos = append(todos, Todo{
 			Completed: false,
 			Text:      "Write a todo app",
-			Id:        uuid.New().String(),
+			Id:        generateRandomString(),
 		})
 		todos = append(todos, Todo{
 			Completed: true,
 			Text:      "Make some lunch",
-			Id:        uuid.New().String(),
+			Id:        generateRandomString(),
 		})
 	}
 
@@ -88,11 +89,10 @@ func main() {
 
 	e.POST("/todo", func(c echo.Context) error {
 		text := c.FormValue("text")
-		newId := uuid.New()
 		newTodo := Todo{
 			Text:      text,
 			Completed: false,
-			Id:        newId.String(),
+			Id:        generateRandomString(),
 		}
 		todos = append(todos, newTodo)
 
@@ -108,15 +108,17 @@ func main() {
 	e.DELETE("/todo/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		if id == "" {
+			c.Logger().Error("failed to get id param")
 			return c.NoContent(http.StatusBadRequest)
 		}
 
 		todoId, err := findTodo(id)
 		if err != nil {
+			c.Logger().Error("failed to find todo")
 			return c.NoContent(http.StatusNotFound)
 		}
 
-		todos = slices.Delete(todos, todoId, todoId)
+		todos = slices.Delete(todos, todoId, todoId+1)
 		return c.HTML(http.StatusOK, "")
 	})
 
@@ -146,4 +148,22 @@ func main() {
 	})
 
 	e.Start(":8080")
+}
+
+func generateRandomString() string {
+	// Define the characters that can be used in the random string
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+	// Seed the random number generator to ensure randomization
+	rand.Seed(time.Now().UnixNano())
+
+	// Create a slice to hold the generated string
+	result := make([]byte, 12)
+
+	// Generate the random string
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(result)
 }

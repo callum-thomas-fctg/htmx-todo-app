@@ -5,7 +5,7 @@
 <div class="flex items-center justify-center mx-auto min-h-screen w-full">
 	<div class="flex flex-col gap-y-4 p-6 border rounded-lg justify-center items-center max-w-2xl h-full">
 		<h2 class="text-2xl font-sans font-bold">Your Todos</h2>
-		<div class="flex flex-col gap-2">
+		<div id="todos" class="flex flex-col gap-2">
 			{{ range .Todos }}
 			<div class="flex flex-row gap-2">
 				<span class="min-w-96 text-lg">{{ .Text }}</span>
@@ -19,16 +19,39 @@
 			</div>
 			{{ end }}
 		</div>
-		<form hx-post="/todo" hx-swap="beforeend" hx-target="#todos">
-			<div class="flex flex-row gap-2">
-				<input class="border rounded p-2" placeholder="New todo!"></input>
+		<form 
+			class="w-full" 
+			hx-post="/todo" 
+			hx-swap="beforeend" 
+			hx-target="#todos" 
+			hx-indicator="#loading-spinner" 
+			hx-disabled-elt="this" 
+			hx-on::before-request="this.querySelector('button').classList.add('htmx-request')" 
+			hx-on::after-request="this.querySelector('button').classList.remove('htmx-request')"
+		>
+			<div class="w-full flex flex-row gap-2 items-center">
+				<input name="text" class="flex-1 h-full border rounded p-2" placeholder="New todo!"></input>
 				<button type="submit"
-					class="border-2 p-4 border-black rounded-lg bg-blue-400 text-white">
-					<span>Add</span>
-					<img src="/static/spinner.svg" class="hx-indicator animate-spin">
+					class="border-2 p-2 border-black rounded-lg bg-blue-400 text-white">
+					<span class="button-text">Add</span>
+					<img id="loading-spinner" src="/static/spinner.svg" class="htmx-indicator h-6 w-6">
 				</button>
 			</div>
 		</form>
 	</div>
 </div>
+<style>
+	.htmx-indicator{
+		display:none;
+	}
+	.htmx-request .htmx-indicator{
+		display:inline;
+	}
+	.htmx-request.htmx-indicator{
+		display:inline;
+	}
+	.htmx-request .button-text{
+		display: none;
+	}
+</style>
 {{ end }}

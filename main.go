@@ -67,6 +67,8 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Renderer = t
 
+	e.Static("/static", "static")
+
 	e.GET("/", func(c echo.Context) error {
 		type IndexData struct {
 			Todos []Todo
@@ -87,8 +89,20 @@ func main() {
 	e.POST("/todo", func(c echo.Context) error {
 		text := c.FormValue("text")
 		newId := uuid.New()
-		todos = append(todos, Todo{Text: text, Completed: false, Id: newId.String()})
-		return c.HTML(http.StatusOK, "<h1>Something here</h1>")
+		newTodo := Todo{
+			Text:      text,
+			Completed: false,
+			Id:        newId.String(),
+		}
+		todos = append(todos, newTodo)
+
+		templ, err := template.ParseFiles("templates/todo.html")
+		if err != nil {
+			c.Logger().Error("failed to parse template")
+			return c.NoContent(http.StatusInternalServerError)
+		}
+
+		return templ.Execute(c.Response().Writer, newTodo)
 	})
 
 	e.DELETE("/todo/:id", func(c echo.Context) error {

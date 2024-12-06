@@ -1,0 +1,10 @@
+<div class="flex flex-row gap-2">
+	<span class="min-w-96 text-lg">{{ .Text }}</span>
+	{{ if .Completed }}
+	<input hx-trigger="click" hx-post="/todo/{{ .Id }}/toggle" hx-swap="outerHTML" hx-target="closest div"
+		type="checkbox" checked></input>
+	{{ else }}
+	<input hx-trigger="click" hx-post="/todo/{{ .Id }}/toggle" hx-swap="outerHTML" hx-target="closest div"
+		type="checkbox"></input>
+	{{ end }}
+</div>
